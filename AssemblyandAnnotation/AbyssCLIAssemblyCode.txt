@@ -1,0 +1,19 @@
+# create an environment called genomeassembly
+mamba create --name genomeassembly
+
+# activate it. It'll say (genomeassembly) in front of your prompt
+mamba activate genomeassembly
+
+# install abyss program. Look through these channels" bioconda and conda-forge abyss
+mamba install -c bioconda -c conda-forge abyss
+
+# important to be in the right working directory. Also try shift + rightclick > "Open Linux Shell Here" ... Or change directory by:
+cd /mnt/c/Users/tayle/Desktop/Spring-2024/'Bioinformatics-BIOL 4810-Tricia Van Laar'/AssemblyandAnnotation
+
+# OR, to get to external drive: "cd /mnt/d"
+
+# abyss on paired end reads, Kmer 96bp on putative Salmonella genome. This is for when our .fastq.gz files are in the Assembly folder
+# abyss on paired end reads. Kmer 960bp on putative Salmonella genome
+abyss-pe name=salmonella k=96 B=2G in='reads1.fastq.gz reads2.fastq.gz' 
+
+# you know your sequencing is done when you get your prompt back. Should say something like (genomeassembly) root@DESKTOP - LSN1BMS:mnt/c/users/tayler/Desktop/Spring-2024/.../AssemblyandAnnotation

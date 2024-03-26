@@ -1,0 +1,13 @@
+# Activate your genome assembly environment
+mamba activate genomeassembly
+
+# install prokka using mamba. It'll search different channels. wherever it finds it, that's what it'll install
+mamba install -c conda-forge -c bioconda -c defaults prokka
+
+##cd /mnt/c/Users/tayle/Desktop/Spring-2024/'Bioinformatics-BIOL 4810-Tricia Van Laar'/AssemblyandAnnotation
+
+# run prokka, create a folder (directory), name it prokkaannotation, prefix gives files the prefix name of salmonella. 
+# The last part is saying within the AbyssOutput folder, we want to annotate the file called salmonella-8.fa. (thats the scaffolds file)
+prokka --outdir prokkaannotation --prefix salmonella AbyssOutput/salmonella-8.fa
+
+#the .gst and .faa files are what we're interested in but they're hard to read. In stead, you can read salmonella.tsv file in excel. "hypothetical protein" is when they found a coding region, but dunno the protein it codes for or what it does.

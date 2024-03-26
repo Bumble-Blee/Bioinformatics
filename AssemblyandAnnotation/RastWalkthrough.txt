@@ -1,0 +1,12 @@
+https://rast.nmpdr.org/
+
+Upload new job
+
+Select a sequence file. For Abyss, we used <name>-8.fa
+
+You can have RAST fill in the form for you:
+Go to NCBI's Taxyonomy page https://www.ncbi.nlm.nih.gov/taxonomy and find the Taxonomy ID (usually 3-7 digits)
+
+We use RASTtk, automatically fix errors, build a metabolic model, and compute similarities.
+
+After it's done, select "Browse annotated genome in SEED Viewer.

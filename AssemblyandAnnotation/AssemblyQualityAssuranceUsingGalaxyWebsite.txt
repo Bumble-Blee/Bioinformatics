@@ -1,0 +1,70 @@
+We use galaxy.eu as our web-based ... Quality assurance
+
+
+
+~~~~ DOWNLOAD SPADES OUTPUT: ~~~~
+
+Type "spades" into tools search
+
+Upload your reads (our reads for the demo are called reads1.fastq.gz and reads2.fastq.gz)
+
+In spades, select "Paired-end: individual datasets"
+
+For FASTA/FASTQ file(s): forward reads and FASTA/FASTQ file(s): reverse reads, select our reads demo files. Order doesn't matter.
+
+Run on default settings.
+
+Download results. (assembly graph, assembly Graph with scaffolds, Contigs, and Scaffolds) 
+^^^ These are the files we will 
+
+
+
+~~~~~ QUALITY CONTROL of SPADES OUTPUT: ~~~~~
+
+Type QUAST in tools search
+
+Under Assembly mode, select "individual assembly (1 contig file per sample)
+
+Select scaffolds file that we have in Galaxy from the above demo. Because we are assessing the quality of Spades
+
+Type of assembly: Genome
+Use a reference genome: Yes
+
+Go to NCBI and search for Salmonella enterica serovar typhimurium 
+(because that's just the genome we are working with for this demo)
+(you can always use your scaffolds file to copy a chunk of the genome and BLAST it to confirm lol)
+
+Download reference genome. Select FASTA (genome sequences) and GFF (annotation features) files.
+(it downloads more files than you need. You just need the .fna and .gff files)
+
+Go back to Galaxy.eu
+Genome feature positions in the reference genome: upload our .gff file
+Reference genome: upload our .fna file.
+
+Operon positions in the reference genome; also use .gff
+Are assemblies scaffolds rather than contigs?: yes
+Is genome large: no (we know from our abyss output .csv file)
+Tool for gene prediction: GeneMarkS if prokaryotes
+
+Enables ribosomal RNA gene finding?: Yes
+
+Enables search for Universal Single-Copy Orthologs using BUSCO: Yes
+
+Check for PDF report output file
+
+!!! RUN IT !!!
+
+This gives us a report of how good our assembly was! Like, number of contigs, number of scaffolds, N50, L50.
+Download PDF report. We are gonna compare this to our Abyss assembly.
+
+
+
+~~~~~ QUALITY CONTROL OF ABYSS ASSEMBLY USING QUAST ~~~~~~
+
+Upload your assembly from abyss. It's the file called salmonella-8.fa
+
+The rest uses the same settings as above.
+
+
+
+Compare the QA pdf outputs. Look @ N50, L50, (<want them to be big) (want them to be small>) number of contigs and scaffolds

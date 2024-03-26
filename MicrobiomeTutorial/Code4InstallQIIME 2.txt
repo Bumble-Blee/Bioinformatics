@@ -1,0 +1,12 @@
+### QIIME is a microbiome pipeline. It can annotate genes from eDNA, analyze species richness, evenness, and organize data taxonomically
+
+### We Natively installing QIIME 2 from https://docs.qiime2.org/2024.2/install/native/
+
+# Get something from the web
+wget https://data.qiime2.org/distro/amplicon/qiime2-amplicon-2024.2-py38-linux-conda.yml
+
+# Create environment
+mamba env create -n qiime2-amplicon-2024.2 --file qiime2-amplicon-2024.2-py38-linux-conda.yml
+
+# remove installation file
+rm qiime2-amplicon-2024.2-py38-linux-conda.yml

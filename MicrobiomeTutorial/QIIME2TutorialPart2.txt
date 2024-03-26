@@ -1,0 +1,125 @@
+git add *
+
+git stash
+
+# make sure that our online repository is the same as our local repository
+git pull
+
+# change working directory to moving pictures tutorial
+
+# activate qiime2 environment
+mamba activate qiime2-amplicon-2024.2
+
+# docs.qiime2.org > movingpictures tutorial
+
+# faith_pd is alpha diversity metric. unifrac = beta, etc...
+
+# view.qiime2.org use to .qzv files
+
+# interpret bray_curtis_emperor.qzv 
+# shows 4 clusters of data that appear to be similar. We don't know what the similarity is: Patient, sample, location of sample?
+# color code the scatter plot based on the different column names
+# The factor that most affects community composition is where the sample was taken from: two different subjects AND where on their body the sample was taken from 
+
+
+# from docs.qiime2.org :
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/faith_pd_vector.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization core-metrics-results/faith-pd-group-significance.qzv
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/evenness_vector.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization core-metrics-results/evenness-group-significance.qzv
+
+# a community with many species has high species richness. that's what faith metric is
+
+# a community with evenness will have a equal amount of all species present
+
+# view core-metrics-results/faith-pd-group-significance.qzv
+# assess species richness: Kruskal-Wallis is like an anova test.... our p val is v small, so it's significant. There's significan differences between body sites, but WHICH groups are the differences significant?
+# pairwise test tells us. use q value
+# the  gut has significantly less richness than either palms
+# the gut and tongue are not significantly different ~~in terms of their richness~~
+# body site and antibiotic use are statistically different in richness. but the subject/person is not different in richness
+
+# community evenness
+# 0.0142 p value is a statistical diff in evenness
+# gut and right palm are the only significan statistical diff (q val is small)
+# palm has higher community evenness 
+
+# from docs.qiime2.org
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column body-site \
+  --o-visualization core-metrics-results/unweighted-unifrac-body-site-significance.qzv \
+  --p-pairwise
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column subject \
+  --o-visualization core-metrics-results/unweighted-unifrac-subject-group-significance.qzv \
+  --p-pairwise
+
+^ alpha diversity . all the sp in comm. are they represented evenly?
+
+v beta diversity. are the two communities the same? what members of the community are there (beta). vs how many are there. (alpha)
+
+# view unweighted-unifrac-body-site-significance.qzv
+# p value for all is low
+# look at pairwise
+
+
+
+~~~~~~~~~taxonomic analysis ~~~~~~~~~~~~~~~~~~~~
+# web get
+wget \
+  -O "gg-13-8-99-515-806-nb-classifier.qza" \
+  "https://data.qiime2.org/2024.2/common/gg-13-8-99-515-806-nb-classifier.qza"
+
+# take refseq artifact (has atcg for each of the reads) and compare it the the file we downloaded. Compare and create visualization in one command
+qiime feature-classifier classify-sklearn \
+  --i-classifier gg-13-8-99-515-806-nb-classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
+
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
+
+
+# create taxonomy bar plot
+qiime taxa barplot \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --o-visualization taxa-bar-plots.qzv
+
+# are there spp found only in certain gut samples?
+qiime feature-table filter-samples \
+  --i-table table.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --p-where "[body-site]='gut'" \
+  --o-filtered-table gut-table.qza
+
+
+
+# differential abundance
+# 1st part : based on the gut sp, are there different spp found in person1 vs person 2?
+# 2nd part : any statistical significance?
+
+qiime composition ancombc \
+  --i-table gut-table.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --p-formula 'subject' \
+  --o-differentials ancombc-subject.qza
+
+qiime composition da-barplot \
+  --i-data ancombc-subject.qza \
+  --p-significance-threshold 0.001 \
+  --o-visualization da-barplot-subject.qzv
+
+# ^hard to interpret. View taxonomy visualizaion. and search the species associated with each ID no.

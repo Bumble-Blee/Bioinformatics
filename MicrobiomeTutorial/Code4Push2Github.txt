@@ -1,0 +1,9 @@
+git add *
+
+git status
+#should show them all in green
+
+git commit -m "additional microbiome files"
+
+git push
+

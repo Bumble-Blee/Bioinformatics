@@ -1,0 +1,11 @@
+##Create an environment called genomeassembly
+
+mamba create --name genomeassembly
+
+mamba activate genome assembly
+
+##install bioconda or forge abyss
+mamba install -c bioconda -c conda-forge abyss
+
+
+
