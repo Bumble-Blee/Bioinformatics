@@ -1,0 +1,32 @@
+---
+title: "Microbiome DADA2"
+author: "Tayler"
+date: "2024-04-16"
+output: pdf_document
+---
+
+# Load required packages
+```{r}
+library(dada2)
+```
+
+# Load sequences. Set path for sequencing files to be our sequenceing files. and we told it to list the files.
+```{r}
+path <- "sequences"
+list.files(path)
+```
+
+# Read in file names
+```{r}
+# Fastq filenames have format: SAMPLENAME_R1_001.fastq. We only have forward reads.
+fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
+
+# Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
+```
+
+# Inspect read quality
+```{r}
+# take first 2 forward reads and pop out a graph of read quality
+plotQualityProfile(fnFs[1:2])
+```

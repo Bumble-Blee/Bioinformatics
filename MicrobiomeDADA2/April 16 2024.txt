@@ -1,0 +1,41 @@
+We are going to be learning more ways to process microbiomes!
+
+We look at sample-metadata and delete the second row.
+(The second row is for quiime2. Remember quiime2 makes artifact files that are proprietary to quiime2.) And save it as a .csv
+
+In microbiome tutorial: We downloaded 2 files (1 with all seqs, and 1 w barcode. We demultiplexed it: splitting it into all individual sequences and removed the barcodes.) https://docs.qiime2.org/2024.2/tutorials/moving-pictures/
+
+Now we need the individual sequences out of the artifact. We will use UBUNTU
+https://docs.qiime2.org/2024.2/tutorials/exporting/
+We are exporting our dmux to use it in DADA2.
+
+#activate qiime2 environment
+In Ubuntu: conda activate qiime2-amplicon-2024.2
+
+# Previously, we removed barcodes and separted into seq chunks. Now, we are opening up demux.qza and getting individual seq files.
+qiime tools export --input-path demux.qza --output-path sequences
+
+#From here on, we use R Studio. New R Markdown. Title Microbiome DADA2. Output as PDF
+#set working directory by going to Session > set working directory > choose directory
+
+ON https://benjjneb.github.io/dada2/
+#Install DADA2
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("dada2", version = "3.16")
+
+# Load required packages and load DADA2
+```{r}
+library(dada2)
+```
+# we just made a chunk in R markdown
+
+# use https://benjjneb.github.io/dada2/tutorial.html to work with paired end data. We will mod it a little bc we have single end data.
+
+
+
+
+
+# environment in top right has all your variables and everything else you created. You extracted the file name.
+
