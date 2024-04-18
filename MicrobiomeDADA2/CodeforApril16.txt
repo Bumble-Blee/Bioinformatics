@@ -39,3 +39,18 @@ library(dada2)
 
 # environment in top right has all your variables and everything else you created. You extracted the file name.
 
+We made graphs and guessed where the quality of the reads dropped off. ~120
+
+trim poor quality reads from samples
+Create folder where filtered/clean reads go.
+
+# we use amchine learning (ai) to predict how many errors we have. Gives us graphs
+
+data is 2 patients at gut lr palm and tongue at 4 different time points. amplifiedsequenced a region of 16s rrna region. 
+
+~~~~~~~~~~~~~~~~~~~~~~~~April 18!~~~~~~~~~~~~~~~~~
+
+The Silva file has species from the database.
+Remember that all zipped folders have .gz at the end.
+
+PhyloSeq is used for 16S sequencing data 
