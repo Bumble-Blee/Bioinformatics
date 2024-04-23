@@ -15,14 +15,16 @@ install(BiMiCo)
 ```
 
 # install peterolah001/BiMiCo: Biomap Microbiome Core methods
-```{}
+```{r}
 install.packages("remotes")
+install.packages("ggplot2")
 ```
 
 # Load required packages
 ```{r}
 library(phyloseq)
 library(dplyr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -82,4 +84,132 @@ physeq
 # save physeq objects to load later
 ```{r}
 save(physeq, file="RData/physeq.RData")
+```
+
+# load physeq objects to start here
+```{r}
+load("RData/physeq.RData")
+```
+
+# plot bar graph based on phylum
+# fill bars based on phylum
+# package from gg plot 2 adds an aesthetic where every phylum is a diff color.. stat=identity uses the raw numbers, NOT the percentages.
+```{r}
+plot_bar(physeq, fill = "Phylum") + geom_bar(aes(color=Phylum, fill=Phylum), stat="identity", position="fill")
+```
+
+#create a barplot of relative abundance
+```{r}
+# convert to relative abundance
+physeq_relabund <- transform_sample_counts(physeq, function(x) x / sum(x))
+
+# barplot
+plot_bar(physeq_relabund, fill = "Phylum") + geom_bar(aes(color=Phylum, fill=Phylum), stat = "identity", position="fill") + facet_wrap(~body.site, scales = "free")
+```
+
+#plot alpha diversity based on body.site
+# plot sp richness based on body site. color points based on the metadata category "subject". 
+```{r}
+plot_richness(physeq, x="body.site", color="subject", 
+measures=c("Observed", "Simpson", "Shannon"))
+```
+
+# plot alpha diversity based on reported.antibiotic.usage
+# could do x="subject"
+```{r}
+plot_richness(physeq, x="reported.antibiotic.usage", color="body.site", measures=c("Observed", "Simpson", "Shannon"))
+```
+
+# plot alpha diversity based on subject
+```{r}
+plot_richness(physeq, x="subject", shape="body.site", 
+measures=c("Observed", "Simpson", "Shannon"))
+```
+
+
+# test for normality
+# In sci you usually have null and alternative hypoth. the null is that the data is normally distributed. the alt is that the data is not normally distributed. if p val is less than 0.05, we can say that the data is not normally distributed.
+```{r}
+#create an object called alpha. the function estimate_richness : for every sample, it pulls out the richness categories we were interested in. Observed spp, and it'll calc the simpson and shannon for every sample. 
+#four column. one column will be observed, shannon, and simpson number.
+# creates 34 objects with 3 variables
+alpha <- estimate_richness(physeq, measures=c("Observed", "Simpson", "Shannon"))
+
+# Shapiro-wilk. a test for normality when you have less than 50 samples. 
+# you do shapiro test on each one of the columns. store results in three diff objects. next line says please do shapiro.test on alpha object, ($=column) on the column called observed. results from shapiro test
+# shannon is normally distribued here. other two are significantly NOT normal.
+observed <- shapiro.test(alpha$Observed)
+shannon <- shapiro.test(alpha$Shannon)
+simpson <- shapiro.test(alpha$Simpson)
+```
+
+#create data frames for statistacal analyses. perform diff. statistical analyses
+# merge metadata file with diversity indexes (observed, shannon, simpson)
+# changes the alpha file!
+# here, we are using raw data
+```{r}
+#pull out all sample info/sample names from phyloseq object. 
+#extract sample information from the physeq object
+
+samples <- sample_data(physeq)
+
+# If samples is a phyloseq sample_data object, convert it to a data frame
+if (class(samples) =="sample_data") {
+  samples <- data.frame(sample_data(samples))
+}
+
+#convert to data frame. a table. a format R can work with.
+#add a column to alpha with sample names
+alpha$sample <- rownames(alpha)
+
+#merge sample name/info file with alpha file we generated
+#merge alpha diversity and sample data.
+alpha <- merge(alpha, samples, by = "sample")
+```
+
+# perform statistics based on subject
+# output values greater than p=0.05
+```{r}
+# Perform t/wilcox tests for each biodiversity index
+# create three objects. 
+# do t test for shannon diversirt based on subject because data is normally distributed
+test_observed <- wilcox.test(Observed ~ subject, data = alpha)
+test_simpson <- wilcox.test(Simpson ~ subject, data = alpha)
+test_shannon <- t.test(Shannon ~ subject, data = alpha)
+
+# Printing the results
+print(test_observed)
+print(test_simpson)
+print(test_shannon)
+```
+
+
+# perform statistics based on reported.antibiotic.usage
+# output values less than p=0.05
+```{r}
+# Perform t/wilcox tests for each biodiversity index
+# create three objects. 
+# do t test for shannon diversirt based on reported.antibiotic.usage because data is normally distributed
+test_observed <- wilcox.test(Observed ~ reported.antibiotic.usage, data = alpha)
+test_simpson <- wilcox.test(Simpson ~ reported.antibiotic.usage, data = alpha)
+test_shannon <- t.test(Shannon ~ reported.antibiotic.usage, data = alpha)
+
+# Printing the results
+print(test_observed)
+print(test_simpson)
+print(test_shannon)
+```
+
+#test for body site
+# Anova for normally distributed data. If not, do kruskal-wallace test
+# this code is doing a multiple comparison test. compairing 4 diff body sites. just doing an anova or just krusk-wall will only tell us that there is a sig. diff. But we want to know how. in what ways they're diff. we want to kno if its the gut and palm, gut mouth, etc. 
+# we are doing a post-hoc test. for non-normally distributed data, we do a pairwise. When doing anova, we do a tookie test.
+```{r}
+kruskal.test(Simpson ~ body.site, data=alpha)
+pairwise.wilcox.test(alpha$Simpson, alpha$body.site, p.adjust.method="holm")
+kruskal.test(Observed ~ body.site, data=alpha)
+pairwise.wilcox.test(alpha$Observed, alpha$body.site, p.adjust.method="holm")
+shannonanova <- aov(Shannon ~ body.site, data=alpha)
+summary(shannonanova)
+TukeyHSD(shannonanova)
 ```
