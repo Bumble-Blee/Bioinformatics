@@ -25,6 +25,7 @@ install.packages("ggplot2")
 library(phyloseq)
 library(dplyr)
 library(ggplot2)
+library(vegan)
 ```
 
 ```{r}
@@ -212,4 +213,111 @@ pairwise.wilcox.test(alpha$Observed, alpha$body.site, p.adjust.method="holm")
 shannonanova <- aov(Shannon ~ body.site, data=alpha)
 summary(shannonanova)
 TukeyHSD(shannonanova)
+```
+
+# remove taxa with relative abundance <0.005%
+# this code removes any taxa that are super rare. find the sum of all the taxa, keep everything above that cutoff. save as object called prune
+```{r}
+minTotRelAbun = 0.00005
+x = taxa_sums(physeq)
+keepTaxa = (x / sum(x)) > minTotRelAbun
+physeqprune = prune_taxa(keepTaxa, physeq)
+physeqprune
+```
+
+
+# Number of shared ASVs body.site
+# how much do they (all species) all share
+# create a venn diagram showing all the categories and what they might share in terms of spp
+# create a venn based on body.site based on prune. in at least 25% or more of individ samples, we ahve shared spp. weight is basically "do you want it to weigh rare taxa? plot=false is a list. relative = relative abundance. we want to report it so we say "true"
+```{r}
+library(devtools)
+library(MicEco)
+bodysite=ps_venn(
+  physeqprune,
+  "body.site",
+  fraction = 0.25,
+  weight = FALSE,
+  relative = TRUE,
+  plot = TRUE
+)
+bodysite
+```
+
+# Bray Curtis Calculation 
+# creates a 2D map 
+calculates how diff each pair is from one another and finds a way to arrange that in 2D space
+# ordinate physeqprune, method+"
+# creates a object using phyloseq objec
+# it runs this over and over again until it finds the best solution (like boostrapping phylogenetic trees)
+```{r message = FALSE}
+set.seed(25)
+dist = phyloseq::distance(physeqprune, method="bray", weighted=TRUE)
+ordination = ordinate(physeqprune, method="NMDS", distance=dist)
+```
+
+#Bray Curtis Subject Plot. 0 = identical, they are exactly the same. and 1 means nothing in common, highest level of dissimilarity.
+```{r}
+braysubject=plot_ordination(physeqprune, ordination, color="subject") +
+  theme_classic() +
+  theme(strip.background = element_blank()) + stat_ellipse(aes(group=subject))
+braysubject
+```
+
+#^i just wanna se a picture of the map. we care about looking at the sumbject
+
+
+# Bray Curtis body site Plot. I want each point to be diff colors and make an ellipse around each point
+####  THIS IS INCOMPLETE I TIHNK
+```{r}
+braybodysite=plot_ordination(physeqprune, ordination, color="body.site") +
+  theme_classic() +
+  theme(strip.background = element_blank()) + stat_ellipse(aes(group=body.site))
+braybodysite
+```
+
+Bray curtis antibiotic usage plot
+```{r}
+brayantibioticusage=plot_ordination(physeqprune, ordination, color="reported.antibiotic.usage") +
+  theme_classic() +
+  theme(strip.background = element_blank()) + 
+  stat_ellipse(aes(group=reported.antibiotic.usage))
+brayantibioticusage
+```
+
+# code to export images for bray styff
+# export tiff with 300dpi
+```{r}
+ggsave(
+  filename="Fig1.tiff",
+  plot = braybodysite,
+  width = 200
+  height = 200,
+  units = 
+  dpi = 300,
+)
+```
+
+
+# 1 bray curtis subject statistics
+# we need the vegan package for this
+# will tell us if the community comp between subject 1 and 2 are significantly different. (running this shows p is above 0.05, showing that theres not a significant difference)
+# call adonis2 function of distance object's data based on subject
+```{r}
+adonis2(dist ~ sample_data(physeqprune)$subject)
+```
+
+# 2 bray curtis body site statistics
+# This asks if there are significan differences between body sites? if yes, this lets us see "which communities of the four body sites are different from one another (post hoc omparison test)
+# after running, it'll say the gut is .003 to right palm. etc etc. use the matrix/chart thingy
+```{r}
+adonis2(dist ~ sample_data(physeqprune)$body.site)
+ps.disper<-betadisper(dist, sample_data(physeqprune)$body.site)
+permutest(ps.disper, pair=TRUE)
+```
+
+#is there a diff between comm composition 
+#Bray curtis antibiotic usage statistics
+```{r}
+adonis2(dist ~ sample_data(physeqprune)$reported.antibiotic.usage)
 ```
