@@ -1,3 +1,0 @@
-# activate environment
-conda activate qiime2-amplicon-2024.2
-

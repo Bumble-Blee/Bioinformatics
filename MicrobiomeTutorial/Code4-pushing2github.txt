@@ -1,9 +1,0 @@
-# 
-git pull 
-
-# will show you if you have any folders that isn't on line
-git status
-
-git commit MicrobiomeTutorial
-
-git push
