@@ -1,0 +1,118 @@
+https://docs.qiime2.org/2024.2/tutorials/moving-pictures/ 
+We used this website in class to learn about QIIME2
+
+# activate qiime2 environment
+mamba activate qiime2-amplicon-2024.2
+
+# create qzv file.
+qiime demux summarize \
+  --i-data demux.qza \
+  --o-visualization demux.qzv
+
+Go to https://view.qiime2.org/. Upload the .qzv file here. Click "Interactive quality plot" in top left.
+
+# quality control of reads based on histogram from above visualization
+# makes three different files: rep-seqs-dada2.qza, table-dada2.qza, stats-dada2.qza
+qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs demux.qza \
+  --p-trim-left-f 13 \
+  --p-trunc-len-f 219 \
+  --p-trim-left-r 13 \
+  --p-trunc-len-r 205 \
+  --o-representative-sequences rep-seqs.qza \
+  --o-table table.qza \
+  --o-denoising-stats stats.qza
+
+Go to https://view.qiime2.org/ and visualize stats-data.qzv to see how many reads you have.
+
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file sample-metadata.tsv
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+
+# save metadata as a text (delimited) file
+
+# Convert table.qza and rep-seqs.qzv to .qza files and visualize on qiime visualization website
+qiime feature-table summarize \
+  --i-table table.qza \
+  --o-visualization table.qzv \
+  --m-sample-metadata-file metadata.csv
+qiime feature-table tabulate-seqs \
+  --i-data rep-seqs.qza \
+  --o-visualization rep-seqs.qzv
+
+# download classfier file
+wget \
+  -O "gg-13-8-99-515-806-nb-classifier.qza" \
+  "https://data.qiime2.org/2024.2/common/gg-13-8-99-515-806-nb-classifier.qza"wget \
+  -O "gg-13-8-99-515-806-nb-classifier.qza" \
+  "https://data.qiime2.org/2024.2/common/gg-13-8-99-515-806-nb-classifier.qza"
+
+# use classifier file and rep-seqs.qza to make a taxonomy.qza file
+# convert taxonomy.qza  to .qzv
+qiime feature-classifier classify-sklearn \
+  --i-classifier gg-13-8-99-515-806-nb-classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
+
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
+
+# remove mt and chloroplast hits
+qiime taxa filter-table \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --p-exclude mitochondria,chloroplast \
+  --o-filtered-table table.qza
+
+# create interactive bar plots
+qiime taxa barplot \
+  --i-table table.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file metadata.txt \
+  --o-visualization taxa-bar-plots.qzv
+
+# choose sampling depth using table.qzv, and output statistics artifacts in a folder called core-metrics-results
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-tree.qza \
+  --i-table table.qza \
+  --p-sampling-depth 7850 \
+  --m-metadata-file metadata.txt \
+  --output-dir core-metrics-results
+
+# Output alpha diversity results (Shannon diversity and observed features) by testing metadata columns and alpha diversity data. We get 2 files. 
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/shannon_vector.qza \
+  --m-metadata-file metadata.txt \
+  --o-visualization core-metrics-results/shannon-group-significance.qzv
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity core-metrics-results/observed_features_vector.qza \
+  --m-metadata-file metadata.txt \
+  --o-visualization core-metrics-results/observed_features-group-significance.qzv
+
+# Do Bray Curtis dissimilarity.
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file metadata.txt \
+  --m-metadata-column sex \
+  --o-visualization core-metrics-results/unweighted-unifrac-sex-significance.qzv \
+  --p-pairwise
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file metadata.txt \
+  --m-metadata-column population \
+  --o-visualization core-metrics-results/unweighted-unifrac-population-group-significance.qzv \
+  --p-pairwise
+
+qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file metadata.txt \
+  --m-metadata-column flock \
+  --o-visualization core-metrics-results/unweighted-unifrac-flock-group-significance.qzv \
+  --p-pairwise
