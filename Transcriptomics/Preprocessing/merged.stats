@@ -1,0 +1,27 @@
+# gffcompare v0.12.6 | Command line was:
+#gffcompare -r paeruginosa.gff -G -o merged stringtie_merged.gtf
+#
+
+#= Summary for dataset: stringtie_merged.gtf 
+#     Query mRNAs :    5741 in    4769 loci  (57 multi-exon transcripts)
+#            (34 multi-transcript loci, ~1.2 transcripts per locus)
+# Reference mRNAs :    5678 in    4854 loci  (0 multi-exon)
+# Super-loci w/ reference transcripts:     4763
+#-----------------| Sensitivity | Precision  |
+        Base level:   100.0     |    98.2    |
+        Exon level:    83.5     |    81.8    |
+  Transcript level:    86.0     |    85.1    |
+       Locus level:    98.5     |    98.4    |
+
+     Matching intron chains:       0
+       Matching transcripts:    4884
+              Matching loci:    4780
+
+          Missed exons:       0/5678	(  0.0%)
+           Novel exons:      14/5792	(  0.2%)
+         Novel introns:      60/60	(100.0%)
+           Missed loci:       0/4854	(  0.0%)
+            Novel loci:       6/4769	(  0.1%)
+
+ Total union super-loci across all input datasets: 4769 
+5741 out of 5741 consensus transcripts written in merged.annotated.gtf (0 discarded as redundant)
