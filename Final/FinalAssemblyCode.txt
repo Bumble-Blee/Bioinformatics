@@ -1,0 +1,14 @@
+~~~~~~~~~ genome assembly using Abyss through CLI ~~~~~~~~~~~
+
+# activate environment
+mamba activate genomeassembly
+
+# abyss on paired end reads, Kmer 96bp on putative Clostridium botulinum genome. This is for our .fastq.gz files.
+abyss-pe name=Cbotulinum k=96 B=2G in='CbotulinumReads1.fastq.gz CbotulinumReads1.fastq.gz' 
+
+# run prokka, create a folder (directory), name it prokkaannotation, prefix gives files the prefix name of Cbotulinum. 
+# The last part is saying within the AbyssOutput folder, we want to annotate the file called Cbotulinum-8.fa. (thats the scaffolds file)
+# Prokka is an annotator
+# the .gst and .faa files output are what we're interested in but they're hard to read. In stead, you can read Cbotulinum.tsv file in excel. "hypothetical protein" is when they found a coding region, but dunno the protein it codes for or what it does.
+prokka --outdir prokkaannotation --prefix Cbotulinum AbyssOutput/Cbotulinum-8.fa
+
